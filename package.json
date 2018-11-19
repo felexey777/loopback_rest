@@ -1,28 +1,33 @@
 {
-  "_from": "@loopback/rest@1.1.0",
-  "_id": "@loopback/rest@1.1.0",
+  "_args": [
+    [
+      "@loopback/rest@1.3.0",
+      "/Users/alex/Documents/Projects/health_master/drhealth_api/functions"
+    ]
+  ],
+  "_from": "@loopback/rest@1.3.0",
+  "_id": "@loopback/rest@1.3.0",
   "_inBundle": false,
-  "_integrity": "sha512-GSWFsn6HS82iXfoyaizW3p2/cb57l40ZBysSZDyHojwxbTLselctp4TrqmOqX/mO0yT+QKdBIHu5TWC+j7cSQw==",
+  "_integrity": "sha512-Xrqt6d+mgvLg5h/dt+4aVHddcXz85wAuzlwN0vP35q5f4VpgaZOJK8QdwkOtnjp2OrDnCTxlprbXbQFIjLWnAA==",
   "_location": "/@loopback/rest",
   "_phantomChildren": {},
   "_requested": {
     "type": "version",
     "registry": true,
-    "raw": "@loopback/rest@1.1.0",
+    "raw": "@loopback/rest@1.3.0",
     "name": "@loopback/rest",
     "escapedName": "@loopback%2frest",
     "scope": "@loopback",
-    "rawSpec": "1.1.0",
+    "rawSpec": "1.3.0",
     "saveSpec": null,
-    "fetchSpec": "1.1.0"
+    "fetchSpec": "1.3.0"
   },
   "_requiredBy": [
-    "#USER",
-    "/"
+    "/",
+    "/@loopback/authentication"
   ],
-  "_resolved": "https://registry.npmjs.org/@loopback/rest/-/rest-1.1.0.tgz",
-  "_shasum": "629d78ce244918926b682d3c647a61c459abb3f9",
-  "_spec": "@loopback/rest@1.1.0",
+  "_resolved": "https://registry.npmjs.org/@loopback/rest/-/rest-1.3.0.tgz",
+  "_spec": "1.3.0",
   "_where": "/Users/alex/Documents/Projects/health_master/drhealth_api/functions",
   "author": {
     "name": "IBM"
@@ -30,19 +35,19 @@
   "bugs": {
     "url": "https://github.com/strongloop/loopback-next/issues"
   },
-  "bundleDependencies": false,
   "copyright.owner": "IBM Corp.",
   "dependencies": {
-    "@loopback/context": "^1.0.0",
-    "@loopback/core": "^1.0.0",
-    "@loopback/http-server": "^1.0.0",
-    "@loopback/openapi-v3": "^1.0.2",
-    "@loopback/openapi-v3-types": "^1.0.0",
+    "@loopback/context": "^1.1.0",
+    "@loopback/core": "^1.1.0",
+    "@loopback/http-server": "^1.0.2",
+    "@loopback/openapi-v3": "^1.1.1",
+    "@loopback/openapi-v3-types": "^1.0.1",
     "@types/cors": "^2.8.3",
     "@types/express": "^4.11.1",
+    "@types/express-serve-static-core": "^4.16.0",
     "@types/http-errors": "^1.6.1",
     "@types/parseurl": "^1.3.1",
-    "@types/qs": "^6.5.1",
+    "@types/serve-static": "1.13.2",
     "ajv": "^6.5.1",
     "body": "^5.1.0",
     "cors": "^2.8.4",
@@ -57,21 +62,21 @@
     "path-to-regexp": "^2.2.0",
     "qs": "^6.5.2",
     "strong-error-handler": "^3.2.0",
+    "type-is": "^1.6.16",
     "validator": "^10.4.0"
   },
-  "deprecated": false,
   "description": "The REST API package for [loopback-next](https://github.com/strongloop/loopback-next).",
   "devDependencies": {
-    "@loopback/build": "^1.0.0",
-    "@loopback/openapi-spec-builder": "^1.0.0",
-    "@loopback/repository": "^1.0.2",
-    "@loopback/testlab": "^1.0.0",
+    "@loopback/build": "^1.0.1",
+    "@loopback/openapi-spec-builder": "^1.0.1",
+    "@loopback/repository": "^1.0.4",
+    "@loopback/testlab": "^1.0.1",
     "@types/debug": "0.0.30",
-    "@types/express-serve-static-core": "^4.16.0",
     "@types/js-yaml": "^3.11.1",
     "@types/lodash": "^4.14.106",
     "@types/node": "^10.11.2",
-    "@types/serve-static": "1.13.2"
+    "@types/qs": "^6.5.1",
+    "@types/type-is": "^1.6.2"
   },
   "engines": {
     "node": ">=8.9"
@@ -84,7 +89,7 @@
     "dist/index*",
     "src"
   ],
-  "gitHead": "69a8f24224990776436c56d6c8e3c3259d6e7411",
+  "gitHead": "a62c8b9d8d8b5204abbe3178122c31cfa214aa11",
   "homepage": "https://github.com/strongloop/loopback-next#readme",
   "license": "MIT",
   "name": "@loopback/rest",
@@ -103,5 +108,5 @@
     "unit": "lb-mocha \"dist/test/unit/**/*.js\"",
     "verify": "npm pack && tar xf loopback-rest*.tgz && tree package && npm run clean"
   },
-  "version": "1.1.0"
+  "version": "1.3.0"
 }

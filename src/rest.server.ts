@@ -34,7 +34,8 @@ import {
   Route,
   RouteEntry,
   RoutingTable,
-} from './router/routing-table';
+  StaticAssetsRoute,
+} from './router';
 import {DefaultSequence, SequenceFunction, SequenceHandler} from './sequence';
 import {
   FindRoute,
@@ -164,16 +165,8 @@ export class RestServer extends Context implements Server, HttpServerLike {
     config.openApiSpec = config.openApiSpec || {};
     config.openApiSpec.endpointMapping =
       config.openApiSpec.endpointMapping || OPENAPI_SPEC_MAPPING;
-    config.apiExplorer = config.apiExplorer || {};
 
-    const url = config.apiExplorer.url || 'https://explorer.loopback.io';
-
-    config.apiExplorer.httpUrl =
-      config.apiExplorer.httpUrl ||
-      config.apiExplorer.url ||
-      'http://explorer.loopback.io';
-
-    config.apiExplorer.url = url;
+    config.apiExplorer = normalizeApiExplorerConfig(config.apiExplorer);
 
     this.config = config;
     this.bind(RestBindings.PORT).to(config.port);
@@ -250,7 +243,16 @@ export class RestServer extends Context implements Server, HttpServerLike {
         this._serveOpenApiSpec(req, res, mapping[p]),
       );
     }
-    this._expressApp.get(['/swagger-ui', '/explorer'], (req, res) =>
+
+    const explorerConfig = this.config.apiExplorer || {};
+    if (explorerConfig.disabled) {
+      debug('Redirect to swagger-ui was disabled by configuration.');
+      return;
+    }
+
+    const explorerPaths = ['/swagger-ui', '/explorer'];
+    debug('Setting up redirect to swagger-ui. URL paths: %j', explorerPaths);
+    this._expressApp.get(explorerPaths, (req, res) =>
       this._redirectToSwaggerUI(req, res),
     );
   }
@@ -270,7 +272,7 @@ export class RestServer extends Context implements Server, HttpServerLike {
      * Check if there is custom router in the context
      */
     const router = this.getSync(RestBindings.ROUTER, {optional: true});
-    const routingTable = new RoutingTable(router);
+    const routingTable = new RoutingTable(router, this._staticAssetRoute);
 
     this._httpHandler = new HttpHandler(this, routingTable);
     for (const b of this.find('controllers.*')) {
@@ -443,11 +445,9 @@ export class RestServer extends Context implements Server, HttpServerLike {
   }
 
   private async _redirectToSwaggerUI(request: Request, response: Response) {
+    const config = this.config.apiExplorer!;
     const protocol = this._getProtocolForRequest(request);
-    const baseUrl =
-      protocol === 'http'
-        ? this.config.apiExplorer!.httpUrl
-        : this.config.apiExplorer!.url;
+    const baseUrl = protocol === 'http' ? config.httpUrl : config.url;
     const openApiUrl = `${this._getUrlForClient(request)}/openapi.json`;
     const fullUrl = `${baseUrl}?url=${openApiUrl}`;
     response.redirect(308, fullUrl);
@@ -605,6 +605,9 @@ export class RestServer extends Context implements Server, HttpServerLike {
     );
   }
 
+  // The route for static assets
+  private _staticAssetRoute = new StaticAssetsRoute();
+
   /**
    * Mount static assets to the REST server.
    * See https://expressjs.com/en/4x/api.html#express.static
@@ -614,7 +617,7 @@ export class RestServer extends Context implements Server, HttpServerLike {
    * @param options Options for serve-static
    */
   static(path: PathParams, rootDir: string, options?: ServeStaticOptions) {
-    this.httpHandler.registerStaticAssets(path, rootDir, options);
+    this._staticAssetRoute.registerAssets(path, rootDir, options);
   }
 
   /**
@@ -818,6 +821,7 @@ export interface ApiExplorerOptions {
    * default to https://loopback.io/api-explorer
    */
   url?: string;
+
   /**
    * URL for the API explorer served over `http` protocol to deal with mixed
    * content security imposed by browsers as the spec is exposed over `http` by
@@ -825,6 +829,12 @@ export interface ApiExplorerOptions {
    * See https://github.com/strongloop/loopback-next/issues/1603
    */
   httpUrl?: string;
+
+  /**
+   * Set this flag to disable the built-in redirect to externally
+   * hosted API Explorer UI.
+   */
+  disabled?: true;
 }
 
 /**
@@ -844,3 +854,17 @@ export interface RestServerOptions {
  * @interface RestServerConfig
  */
 export type RestServerConfig = RestServerOptions & HttpServerOptions;
+
+function normalizeApiExplorerConfig(
+  input: ApiExplorerOptions | undefined,
+): ApiExplorerOptions {
+  const config = input || {};
+  const url = config.url || 'https://explorer.loopback.io';
+
+  config.httpUrl =
+    config.httpUrl || config.url || 'http://explorer.loopback.io';
+
+  config.url = url;
+
+  return config;
+}

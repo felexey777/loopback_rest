@@ -40,4 +40,4 @@ export declare function matchDateFormat(date: string): boolean;
  * @param type The type in an OpenAPI schema specification
  * @param format The format in an OpenAPI schema specification
  */
-export declare function getOAIPrimitiveType(type?: string, format?: string): "password" | "object" | "string" | "number" | "binary" | "boolean" | "date" | "array" | "integer" | "date-time" | "float" | "double" | "byte" | "long" | undefined;
+export declare function getOAIPrimitiveType(type?: string, format?: string): "password" | "object" | "string" | "number" | "binary" | "boolean" | "array" | "date" | "integer" | "date-time" | "float" | "double" | "byte" | "long" | undefined;

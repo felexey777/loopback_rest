@@ -1,10 +1,10 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const pathToRegExp = require("path-to-regexp");
 // Copyright IBM Corp. 2018. All Rights Reserved.
 // Node module: @loopback/rest
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
+Object.defineProperty(exports, "__esModule", { value: true });
+const pathToRegExp = require("path-to-regexp");
 /**
  * Sorting order for http verbs
  */
@@ -23,45 +23,33 @@ const HTTP_VERBS = {
  * @param route2 Second route entry
  */
 function compareRoute(route1, route2) {
-    // First check verb
-    const verb1 = HTTP_VERBS[route1.verb.toLowerCase()] || HTTP_VERBS.get;
-    const verb2 = HTTP_VERBS[route2.verb.toLowerCase()] || HTTP_VERBS.get;
-    if (verb1 !== verb2)
-        return verb1 - verb2;
-    // Then check the path tokens
+    // First check the path tokens
     const path1 = route1.path.replace(/{([^}]*)}(\/|$)/g, ':$1$2');
     const path2 = route2.path.replace(/{([^}]*)}(\/|$)/g, ':$1$2');
     const tokensForPath1 = parse(path1);
     const tokensForPath2 = parse(path2);
-    // Longer path comes before shorter path
-    if (tokensForPath1.length < tokensForPath2.length) {
-        return 1;
-    }
-    else if (tokensForPath1.length > tokensForPath2.length) {
-        return -1;
-    }
-    // Now check token by token
-    for (let i = 0; i < tokensForPath1.length; i++) {
+    const length = tokensForPath1.length > tokensForPath2.length
+        ? tokensForPath1.length
+        : tokensForPath2.length;
+    for (let i = 0; i < length; i++) {
         const token1 = tokensForPath1[i];
         const token2 = tokensForPath2[i];
-        if (typeof token1 === 'string' && typeof token2 === 'string') {
-            if (token1 < token2)
-                return -1;
-            else if (token1 > token2)
-                return 1;
-        }
-        else if (typeof token1 === 'string' && typeof token2 === 'object') {
-            // token 1 is a literal while token 2 is a parameter
-            return -1;
-        }
-        else if (typeof token1 === 'object' && typeof token2 === 'string') {
-            // token 1 is a parameter while token 2 is a literal
+        if (token1 === token2)
+            continue;
+        if (token1 === undefined)
             return 1;
-        }
-        else {
-            // Both token are parameters. Treat as equal weight.
-        }
+        if (token2 === undefined)
+            return -1;
+        if (token1 < token2)
+            return -1;
+        if (token1 > token2)
+            return 1;
     }
+    // Then check verb
+    const verb1 = HTTP_VERBS[route1.verb.toLowerCase()] || HTTP_VERBS.get;
+    const verb2 = HTTP_VERBS[route2.verb.toLowerCase()] || HTTP_VERBS.get;
+    if (verb1 !== verb2)
+        return verb1 - verb2;
     return 0;
 }
 exports.compareRoute = compareRoute;
@@ -77,7 +65,8 @@ function parse(path) {
             tokens.push(...p.split('/').filter(Boolean));
         }
         else {
-            tokens.push(p);
+            // Use `{}` for wildcard as they are larger than any other ascii chars
+            tokens.push(`{}`);
         }
     });
     return tokens;

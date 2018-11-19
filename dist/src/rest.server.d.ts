@@ -9,7 +9,7 @@ import { PathParams } from 'express-serve-static-core';
 import { IncomingMessage, ServerResponse } from 'http';
 import { ServeStaticOptions } from 'serve-static';
 import { HttpHandler } from './http-handler';
-import { ControllerClass, ControllerFactory, ControllerInstance, RouteEntry } from './router/routing-table';
+import { ControllerClass, ControllerFactory, ControllerInstance, RouteEntry } from './router';
 import { SequenceFunction, SequenceHandler } from './sequence';
 import { Request, Response } from './types';
 export declare type HttpRequestListener = (req: IncomingMessage, res: ServerResponse) => void;
@@ -179,6 +179,7 @@ export declare class RestServer extends Context implements Server, HttpServerLik
      * @param route The route to add.
      */
     route(route: RouteEntry): Binding;
+    private _staticAssetRoute;
     /**
      * Mount static assets to the REST server.
      * See https://expressjs.com/en/4x/api.html#express.static
@@ -306,6 +307,11 @@ export interface ApiExplorerOptions {
      * See https://github.com/strongloop/loopback-next/issues/1603
      */
     httpUrl?: string;
+    /**
+     * Set this flag to disable the built-in redirect to externally
+     * hosted API Explorer UI.
+     */
+    disabled?: true;
 }
 /**
  * Options for RestServer configuration

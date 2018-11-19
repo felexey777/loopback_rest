@@ -5,7 +5,7 @@ import { PathParams } from 'express-serve-static-core';
 import { ServeStaticOptions } from 'serve-static';
 import { RestBindings } from './keys';
 import { HttpRequestListener, HttpServerLike, RestServer } from './rest.server';
-import { ControllerClass, ControllerFactory, RouteEntry } from './router/routing-table';
+import { ControllerClass, ControllerFactory, RouteEntry } from './router';
 import { SequenceFunction, SequenceHandler } from './sequence';
 export declare const ERR_NO_MULTI_SERVER: string;
 export declare const SequenceActions: typeof RestBindings.SequenceActions;

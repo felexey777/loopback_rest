@@ -1,4 +1,8 @@
 "use strict";
+// Copyright IBM Corp. 2017,2018. All Rights Reserved.
+// Node module: @loopback/rest
+// This file is licensed under the MIT License.
+// License text available at https://opensource.org/licenses/MIT
 Object.defineProperty(exports, "__esModule", { value: true });
 const HttpErrors = require("http-errors");
 var RestHttpErrors;
@@ -11,6 +15,17 @@ var RestHttpErrors;
         }, extraProperties);
     }
     RestHttpErrors.invalidData = invalidData;
+    function unsupportedMediaType(contentType, allowedTypes = []) {
+        const msg = allowedTypes && allowedTypes.length
+            ? `Content-type ${contentType} does not match [${allowedTypes}].`
+            : `Content-type ${contentType} is not supported.`;
+        return Object.assign(new HttpErrors.UnsupportedMediaType(msg), {
+            code: 'UNSUPPORTED_MEDIA_TYPE',
+            contentType: contentType,
+            allowedMediaTypes: allowedTypes,
+        });
+    }
+    RestHttpErrors.unsupportedMediaType = unsupportedMediaType;
     function missingRequired(name) {
         const msg = `Required parameter ${name} is missing!`;
         return Object.assign(new HttpErrors.BadRequest(msg), {

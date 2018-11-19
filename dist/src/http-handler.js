@@ -4,11 +4,11 @@
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 Object.defineProperty(exports, "__esModule", { value: true });
-const routing_table_1 = require("./router/routing-table");
+const router_1 = require("./router");
 const keys_1 = require("./keys");
 const request_context_1 = require("./request-context");
 class HttpHandler {
-    constructor(_rootContext, _routes = new routing_table_1.RoutingTable()) {
+    constructor(_rootContext, _routes = new router_1.RoutingTable()) {
         this._rootContext = _rootContext;
         this._routes = _routes;
         this.handleRequest = (req, res) => this._handleRequest(req, res);
@@ -21,9 +21,6 @@ class HttpHandler {
     }
     registerApiDefinitions(defs) {
         this._apiDefinitions = Object.assign({}, this._apiDefinitions, defs);
-    }
-    registerStaticAssets(path, rootDir, options) {
-        this._routes.registerStaticAssets(path, rootDir, options);
     }
     getApiDefinitions() {
         return this._apiDefinitions;

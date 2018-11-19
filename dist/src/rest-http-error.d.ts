@@ -1,6 +1,11 @@
 import * as HttpErrors from 'http-errors';
 export declare namespace RestHttpErrors {
     function invalidData<T, Props extends object = {}>(data: T, name: string, extraProperties?: Props): HttpErrors.HttpError & Props;
+    function unsupportedMediaType(contentType: string, allowedTypes?: string[]): HttpErrors.HttpError & {
+        code: string;
+        contentType: string;
+        allowedMediaTypes: string[];
+    };
     function missingRequired(name: string): HttpErrors.HttpError;
     function invalidParamLocation(location: string): HttpErrors.HttpError;
     const INVALID_REQUEST_BODY_MESSAGE = "The request body is invalid. See error object `details` property for more info.";

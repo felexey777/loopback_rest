@@ -4,7 +4,7 @@
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 Object.defineProperty(exports, "__esModule", { value: true });
-const routing_table_1 = require("./routing-table");
+const route_entry_1 = require("./route-entry");
 const util_1 = require("util");
 const route_sort_1 = require("./route-sort");
 const pathToRegExp = require("path-to-regexp");
@@ -48,7 +48,7 @@ class RegExpRouter extends router_base_1.BaseRouter {
             }
             const pathParams = this._buildPathParams(r, match);
             debug(' -> found with params: %j', pathParams);
-            return routing_table_1.createResolvedRoute(r, pathParams);
+            return route_entry_1.createResolvedRoute(r, pathParams);
         }
         return undefined;
     }

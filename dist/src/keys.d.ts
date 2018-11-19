@@ -7,7 +7,7 @@ import { BindingKey, Context } from '@loopback/context';
 import { OpenAPIObject as OpenApiSpec } from 'openapi3-ts';
 import { HttpHandler } from './http-handler';
 import { SequenceHandler } from './sequence';
-import { BindElement, FindRoute, GetFromContext, InvokeMethod, LogError, Request, Response, ParseParams, Reject, Send } from './types';
+import { BindElement, FindRoute, GetFromContext, InvokeMethod, LogError, Request, Response, ParseParams, Reject, Send, RequestBodyParserOptions } from './types';
 import { HttpProtocol } from '@loopback/http-server';
 import * as https from 'https';
 import { ErrorWriterOptions } from 'strong-error-handler';
@@ -57,6 +57,7 @@ export declare namespace RestBindings {
      * by `@loopback/rest`.
      */
     const ERROR_WRITER_OPTIONS: BindingKey<ErrorWriterOptions>;
+    const REQUEST_BODY_PARSER_OPTIONS: BindingKey<RequestBodyParserOptions>;
     /**
      * Binding key for setting and injecting an OpenAPI spec
      */

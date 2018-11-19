@@ -38,9 +38,7 @@ async function parseOperationArgs(request, route, options = {}) {
     debug('Parsing operation arguments for route %s', route.describe());
     const operationSpec = route.spec;
     const pathParams = route.pathParams;
-    // const body = await loadRequestBodyIfNeeded(operationSpec, request, options);
-    const body = request.body;
-    console.log(body);
+    const body = await loadRequestBodyIfNeeded(operationSpec, request, options);
     return buildOperationArguments(operationSpec, request, pathParams, body, route.schemas);
 }
 exports.parseOperationArgs = parseOperationArgs;
@@ -99,8 +97,6 @@ async function loadRequestBodyIfNeeded(operationSpec, request, options = {}) {
                     },
                 },
             }, options));
-            debugger;
-            console.log(body);
             return Object.assign(requestBody, {
                 // form parser returns an object without prototype
                 // create a new copy to simplify shouldjs assertions
@@ -116,8 +112,9 @@ async function loadRequestBodyIfNeeded(operationSpec, request, options = {}) {
     }
     if (type_is_1.is(matchedMediaType, 'json')) {
         try {
-            const jsonBody = await parseJsonBody(request, options);
-            requestBody.value = jsonBody;
+            const { body } = request;
+            //const jsonBody =  await parseJsonBody(request, options);
+            requestBody.value = body;
             return requestBody;
         }
         catch (err) {
@@ -151,11 +148,9 @@ function buildOperationArguments(operationSpec, request, pathParams, body, globa
         paramArgs.push(coercedValue);
     }
     debug('Validating request body - value %j', body);
-    console.log('Validating request body - value %j', body);
     request_body_validator_1.validateRequestBody(body, operationSpec.requestBody, globalSchemas);
     if (requestBodyIndex > -1)
-        paramArgs.splice(requestBodyIndex, 0, body);
-    console.log('paramArgs - value %j', paramArgs);
+        paramArgs.splice(requestBodyIndex, 0, body.value);
     return paramArgs;
 }
 function getParamFromRequest(spec, request, pathParams) {

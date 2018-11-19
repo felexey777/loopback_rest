@@ -4,7 +4,7 @@
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 Object.defineProperty(exports, "__esModule", { value: true });
-const routing_table_1 = require("./routing-table");
+const route_entry_1 = require("./route-entry");
 const trie_1 = require("./trie");
 const util_1 = require("util");
 const router_base_1 = require("./router-base");
@@ -30,7 +30,7 @@ class TrieRouter extends router_base_1.BaseRouter {
             const route = found.node.value;
             if (route) {
                 debug('Route found: %s', util_1.inspect(route, { depth: 5 }));
-                return routing_table_1.createResolvedRoute(route, found.params || {});
+                return route_entry_1.createResolvedRoute(route, found.params || {});
             }
         }
         return undefined;

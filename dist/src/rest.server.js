@@ -28,7 +28,7 @@ const js_yaml_1 = require("js-yaml");
 const http_handler_1 = require("./http-handler");
 const keys_1 = require("./keys");
 const parser_1 = require("./parser");
-const routing_table_1 = require("./router/routing-table");
+const router_1 = require("./router");
 const sequence_1 = require("./sequence");
 const debug = debugFactory('loopback:rest:server');
 const SequenceActions = keys_1.RestBindings.SequenceActions;
@@ -80,6 +80,8 @@ let RestServer = class RestServer extends context_1.Context {
      */
     constructor(app, config = {}) {
         super(app);
+        // The route for static assets
+        this._staticAssetRoute = new router_1.StaticAssetsRoute();
         // Can't check falsiness, 0 is a valid port.
         if (config.port == null) {
             config.port = 3000;
@@ -91,13 +93,7 @@ let RestServer = class RestServer extends context_1.Context {
         config.openApiSpec = config.openApiSpec || {};
         config.openApiSpec.endpointMapping =
             config.openApiSpec.endpointMapping || OPENAPI_SPEC_MAPPING;
-        config.apiExplorer = config.apiExplorer || {};
-        const url = config.apiExplorer.url || 'https://explorer.loopback.io';
-        config.apiExplorer.httpUrl =
-            config.apiExplorer.httpUrl ||
-                config.apiExplorer.url ||
-                'http://explorer.loopback.io';
-        config.apiExplorer.url = url;
+        config.apiExplorer = normalizeApiExplorerConfig(config.apiExplorer);
         this.config = config;
         this.bind(keys_1.RestBindings.PORT).to(config.port);
         this.bind(keys_1.RestBindings.HOST).to(config.host);
@@ -168,7 +164,14 @@ let RestServer = class RestServer extends context_1.Context {
         for (const p in mapping) {
             this._expressApp.use(p, (req, res) => this._serveOpenApiSpec(req, res, mapping[p]));
         }
-        this._expressApp.get(['/swagger-ui', '/explorer'], (req, res) => this._redirectToSwaggerUI(req, res));
+        const explorerConfig = this.config.apiExplorer || {};
+        if (explorerConfig.disabled) {
+            debug('Redirect to swagger-ui was disabled by configuration.');
+            return;
+        }
+        const explorerPaths = ['/swagger-ui', '/explorer'];
+        debug('Setting up redirect to swagger-ui. URL paths: %j', explorerPaths);
+        this._expressApp.get(explorerPaths, (req, res) => this._redirectToSwaggerUI(req, res));
     }
     _handleHttpRequest(request, response) {
         return this.httpHandler.handleRequest(request, response);
@@ -184,7 +187,7 @@ let RestServer = class RestServer extends context_1.Context {
          * Check if there is custom router in the context
          */
         const router = this.getSync(keys_1.RestBindings.ROUTER, { optional: true });
-        const routingTable = new routing_table_1.RoutingTable(router);
+        const routingTable = new router_1.RoutingTable(router, this._staticAssetRoute);
         this._httpHandler = new http_handler_1.HttpHandler(this, routingTable);
         for (const b of this.find('controllers.*')) {
             const controllerName = b.key.replace(/^controllers\./, '');
@@ -202,7 +205,7 @@ let RestServer = class RestServer extends context_1.Context {
             if (apiSpec.components && apiSpec.components.schemas) {
                 this._httpHandler.registerApiDefinitions(apiSpec.components.schemas);
             }
-            const controllerFactory = routing_table_1.createControllerFactoryForBinding(b.key);
+            const controllerFactory = router_1.createControllerFactoryForBinding(b.key);
             this._httpHandler.registerController(apiSpec, ctor, controllerFactory);
         }
         for (const b of this.find('routes.*')) {
@@ -227,7 +230,7 @@ let RestServer = class RestServer extends context_1.Context {
             // modify the original spec object provided by user.
             spec = Object.assign({}, spec);
             delete spec['x-operation'];
-            const route = new routing_table_1.Route(verb, path, spec, handler);
+            const route = new router_1.Route(verb, path, spec, handler);
             this._httpHandler.registerRoute(route);
             return;
         }
@@ -241,8 +244,8 @@ let RestServer = class RestServer extends context_1.Context {
             if (!ctor) {
                 throw new Error(`The controller ${controllerName} was not bound via .toClass()`);
             }
-            const controllerFactory = routing_table_1.createControllerFactoryForBinding(b.key);
-            const route = new routing_table_1.ControllerRoute(verb, path, spec, ctor, controllerFactory);
+            const controllerFactory = router_1.createControllerFactoryForBinding(b.key);
+            const route = new router_1.ControllerRoute(verb, path, spec, ctor, controllerFactory);
             this._httpHandler.registerRoute(route);
             return;
         }
@@ -315,10 +318,9 @@ let RestServer = class RestServer extends context_1.Context {
         return protocol + '://' + host;
     }
     async _redirectToSwaggerUI(request, response) {
+        const config = this.config.apiExplorer;
         const protocol = this._getProtocolForRequest(request);
-        const baseUrl = protocol === 'http'
-            ? this.config.apiExplorer.httpUrl
-            : this.config.apiExplorer.url;
+        const baseUrl = protocol === 'http' ? config.httpUrl : config.url;
         const openApiUrl = `${this._getUrlForClient(request)}/openapi.json`;
         const fullUrl = `${baseUrl}?url=${openApiUrl}`;
         response.redirect(308, fullUrl);
@@ -367,7 +369,7 @@ let RestServer = class RestServer extends context_1.Context {
                     message: 'handler function is required for a handler-based route',
                 });
             }
-            return this.route(new routing_table_1.Route(routeOrVerb, path, spec, controllerCtorOrHandler));
+            return this.route(new router_1.Route(routeOrVerb, path, spec, controllerCtorOrHandler));
         }
         if (!controllerCtorOrHandler) {
             throw new assert_1.AssertionError({
@@ -379,7 +381,7 @@ let RestServer = class RestServer extends context_1.Context {
                 message: 'methodName is required for a controller-based route',
             });
         }
-        return this.route(new routing_table_1.ControllerRoute(routeOrVerb, path, spec, controllerCtorOrHandler, controllerFactory, methodName));
+        return this.route(new router_1.ControllerRoute(routeOrVerb, path, spec, controllerCtorOrHandler, controllerFactory, methodName));
     }
     /**
      * Mount static assets to the REST server.
@@ -390,7 +392,7 @@ let RestServer = class RestServer extends context_1.Context {
      * @param options Options for serve-static
      */
     static(path, rootDir, options) {
-        this.httpHandler.registerStaticAssets(path, rootDir, options);
+        this._staticAssetRoute.registerAssets(path, rootDir, options);
     }
     /**
      * Set the OpenAPI specification that defines the REST API schema for this
@@ -547,4 +549,12 @@ const OPENAPI_SPEC_MAPPING = {
     '/openapi.json': { version: '3.0.0', format: 'json' },
     '/openapi.yaml': { version: '3.0.0', format: 'yaml' },
 };
+function normalizeApiExplorerConfig(input) {
+    const config = input || {};
+    const url = config.url || 'https://explorer.loopback.io';
+    config.httpUrl =
+        config.httpUrl || config.url || 'http://explorer.loopback.io';
+    config.url = url;
+    return config;
+}
 //# sourceMappingURL=rest.server.js.map

@@ -1,4 +1,4 @@
-import { RouteEntry } from './routing-table';
+import { RouteEntry } from './route-entry';
 /**
  * Compare two routes by verb/path for sorting
  * @param route1 First route entry

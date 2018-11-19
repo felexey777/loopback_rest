@@ -4,8 +4,8 @@
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 Object.defineProperty(exports, "__esModule", { value: true });
-const routing_table_1 = require("./routing-table");
 const openapi_path_1 = require("./openapi-path");
+const route_entry_1 = require("./route-entry");
 const route_sort_1 = require("./route-sort");
 /**
  * Base router implementation that only handles path without variables
@@ -39,7 +39,7 @@ class BaseRouter {
         const path = this.getKeyForRequest(request);
         let route = this.routesWithoutPathVars[path];
         if (route)
-            return routing_table_1.createResolvedRoute(route, {});
+            return route_entry_1.createResolvedRoute(route, {});
         else
             return this.findRouteWithPathVars(request);
     }

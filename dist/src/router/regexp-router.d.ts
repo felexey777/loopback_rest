@@ -1,5 +1,5 @@
 /// <reference types="express" />
-import { RouteEntry, ResolvedRoute } from './routing-table';
+import { RouteEntry, ResolvedRoute } from './route-entry';
 import { Request } from '../types';
 import pathToRegExp = require('path-to-regexp');
 import { BaseRouter } from './router-base';

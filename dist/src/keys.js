@@ -52,6 +52,7 @@ var RestBindings;
      * by `@loopback/rest`.
      */
     RestBindings.ERROR_WRITER_OPTIONS = context_1.BindingKey.create('rest.errorWriterOptions');
+    RestBindings.REQUEST_BODY_PARSER_OPTIONS = context_1.BindingKey.create('rest.requestBodyParserOptions');
     /**
      * Binding key for setting and injecting an OpenAPI spec
      */
